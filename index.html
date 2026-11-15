@@ -232,6 +232,11 @@ html[lang="uk"] .try::before{content:"Спробуй → "}
 .langb:hover{border-color:var(--hema)}
 .langb b{font-family:var(--display);font-size:1.35rem}
 .langb span{color:var(--muted);font-size:.9rem}
+.chips.sub .chip{font-size:.8rem;padding:4px 10px;background:var(--bg)}
+.chips.sub .chip.on{background:var(--hema);border-color:var(--hema)}
+.brain ellipse.rg[data-id="bg"]:not(.act){fill:var(--surface);stroke-dasharray:4 3}
+.brain .strip.cd{stroke-width:13;stroke-linecap:round}
+.brain .strip.cd:not(.act){stroke:color-mix(in srgb,var(--hema) 35%,var(--surface))}
 .scene{margin-top:8px}
 .facts-h{font-size:1.05rem;margin:26px 0 8px;padding-top:16px;border-top:1px solid var(--line)}
 .rev .rexp{display:block;margin-top:3px;color:var(--ink);line-height:1.45}
@@ -918,6 +923,200 @@ function simBrain(root,startMode){
   show();
 }
 
+/* ---- Kora, móżdżek, jądra podstawne: scenki ---- */
+const L=(pl,uk)=>{UA[pl]=uk;return pl};
+function simCBG(root){
+  const C=colors();
+  const [cv,x]=canvas(360,210);
+  const T=(s,X,Y,o={})=>{x.font=`${o.w||500} ${o.s||13}px IBM Plex Sans, sans-serif`;x.fillStyle=o.c||C.ink;x.textAlign=o.a||"left";x.fillText(s,X,Y);x.textAlign="left"};
+  const circ=(X,Y,r,fill,stroke,lw)=>{x.beginPath();x.arc(X,Y,r,0,Math.PI*2);if(fill){x.fillStyle=fill;x.fill()}if(stroke){x.strokeStyle=stroke;x.lineWidth=lw||2;x.stroke()}};
+  const line=(a,b,c,d,col,w)=>{x.strokeStyle=col;x.lineWidth=w||2;x.lineCap="round";x.beginPath();x.moveTo(a,b);x.lineTo(c,d);x.stroke()};
+  const rr=(X,Y,w,h,r,fill,stroke)=>{x.beginPath();x.roundRect?x.roundRect(X,Y,w,h,r):x.rect(X,Y,w,h);if(fill){x.fillStyle=fill;x.fill()}if(stroke){x.strokeStyle=stroke;x.lineWidth=1.5;x.stroke()}};
+  const person=(X,Y,col,o={})=>{const hx=X+(o.hx||0);circ(hx,Y-58,12,C.soft,col,2);line(X,Y-46,X,Y-14,col,3);
+    line(X,Y-14,X-8+(o.l1||0),Y+12,col,3);line(X,Y-14,X+8+(o.l2||0),Y+12,col,3);
+    line(X,Y-38,X-16+(o.a1x||0),Y-20+(o.a1y||0),col,3);line(X,Y-38,X+16+(o.a2x||0),Y-20+(o.a2y||0),col,3)};
+  const noise=(t,s)=>Math.sin(t*1.3+s)*.5+Math.sin(t*2.9+s*2)*.3+Math.sin(t*5.1+s*3)*.2;
+
+  const G=[
+  {id:"cx",n:L("Kora mózgowa","Кора великих півкуль"),scenes:[
+   {id:"lay",n:L("6 warstw","6 шарів"),slider:null,
+    cap:()=>[1,L("Kora nowa: sześć warstw, każda z inną rolą","Нова кора: шість шарів, кожен зі своєю роллю")],
+    draw(t){
+      const top=14,h=28,LB=["I","II","III","IV","V","VI"],D=[
+        L("mało komórek, włókna","мало клітин, волокна"),L("łączy obszary kory","зв'язує ділянки кори"),L("łączy obszary kory","зв'язує ділянки кори"),
+        L("WEJŚCIE ze wzgórza","ВХІД від таламуса"),L("WYJŚCIE do pnia","ВИХІД до стовбура"),L("zwrotnie do wzgórza","назад до таламуса")];
+      for(let i=0;i<6;i++){const y=top+i*h;x.fillStyle=i%2?C.soft:C.surface;x.fillRect(46,y,104,h);T(LB[i],30,y+19,{w:700,c:C.hema,a:"center"});T(D[i],158,y+18,{s:11,c:i===3||i===4?C.eosin:C.muted,w:i===3||i===4?700:500})}
+      x.strokeStyle=C.line;x.strokeRect(46,top,104,6*h);
+      const rnd=k=>{const v=Math.sin(k*91.7)*999;return v-Math.floor(v)};
+      for(let i=0;i<6;i++){const n=[2,5,5,7,3,5][i];for(let k=0;k<n;k++){const X=54+rnd(i*10+k)*88,Y=top+i*h+8+rnd(i*20+k)*12;
+        if(i===3)circ(X,Y,3,C.hema);else if(i===0)line(X-6,Y,X+6,Y,C.muted,1);else{const s=i===4?7:4;x.fillStyle=C.hema;x.beginPath();x.moveTo(X,Y-s);x.lineTo(X-s*.7,Y+s*.6);x.lineTo(X+s*.7,Y+s*.6);x.fill()}}}
+      const ph=(t%4000)/4000;let px=98,py;
+      if(ph<.25)py=lerp(top+6*h+20,top+3*h+14,ph/.25);else if(ph<.5)py=lerp(top+3*h+14,top+1.5*h,(ph-.25)/.25);else if(ph<.75)py=lerp(top+1.5*h,top+4*h+14,(ph-.5)/.25);else{py=top+4*h+14+(ph-.75)/.25*40;px=98+(ph-.75)/.25*30}
+      circ(px,py,6,C.eosin,C.surface,2);
+      T("↑ "+tr(L("ze wzgórza","від таламуса")),50,206,{s:11,c:C.muted});
+    }},
+   {id:"dec",n:L("Decyzja: test pianki","Рішення: тест маршмелоу"),slider:[L("Zdrowa kora przedczołowa","Здорова префронтальна кора"),L("Uszkodzona","Уражена")],
+    cap:d=>d<.35?[1,L("Kora przedczołowa hamuje impuls: czekam na 2 słodycze","Префронтальна кора гальмує імпульс: чекаю на 2 солодощі")]:[0,L("Brak hamowania: biorę od razu","Немає гальмування: беру одразу")],
+    draw(t,d){
+      const per=6000,ph=t%per,grabAt=d<.35?1e9:lerp(4500,500,(d-.35)/.65),grabbed=ph>grabAt,done=ph>4800&&!grabbed;
+      person(90,175,C.hema,grabbed?{a2x:40,a2y:-6}:{});
+      rr(140,150,90,10,5,C.line);circ(170,143,9,"#f4e6ef",C.eosin,1.5);if(done)circ(196,143,9,"#f4e6ef",C.eosin,1.5);
+      if(grabbed){x.globalAlpha=.25;circ(170,143,9,C.eosin);x.globalAlpha=1}
+      const k=Math.min(1,ph/4800);x.strokeStyle=C.line;x.lineWidth=6;x.beginPath();x.arc(300,70,32,0,7);x.stroke();
+      x.strokeStyle=grabbed?C.bad:C.good;x.beginPath();x.arc(300,70,32,-Math.PI/2,-Math.PI/2+Math.PI*2*(grabbed?grabAt/4800:k));x.stroke();
+      T("⏱",300,77,{a:"center",s:18});
+      T(grabbed?tr(L("Zjem teraz!","З'їм зараз!")):done?tr(L("Czekałem: dwie!","Дочекався: дві!")):tr(L("Poczekam…","Почекаю…")),20,30,{w:700,s:15,c:grabbed?C.bad:done?C.good:C.ink});
+    }},
+   {id:"per",n:L("Świadome widzenie i mowa","Свідомий зір і мовлення"),slider:[L("Zdrowa kora","Здорова кора"),L("Uszkodzona","Уражена")],
+    cap:d=>d<.35?[1,L("Kora: widzę, rozpoznaję, nazywam","Кора: бачу, впізнаю, називаю")]:[0,L("Bez kory nie ma świadomego obrazu ani słów","Без кори немає свідомого образу і слів")],
+    draw(t,d){
+      const ph=(t%5000)/5000,ax=lerp(330,250,smooth(ph*3));
+      circ(ax,150,16,C.bad);line(ax,134,ax+4,126,C.good,3);
+      circ(70,120,24,C.soft,C.hema,2);const ex=70+clamp((ax-70)/40,-6,6)*.6;circ(ex+6,116,3,C.ink);circ(ex-6,116,3,C.ink);
+      if(ph>.4){const full=d<.35?L("To jabłko. Jabłko!","Це яблуко. Яблуко!"):d<.7?L("To… ja… bł…","Це… яб… лу…"):"…";
+        rr(100,40,170,44,12,C.surface,C.hema);T(tr(full),112,67,{w:700,s:15,c:d<.35?C.ink:C.bad})}
+      if(d>=.7&&ph>.4)T(tr(L("Oczy patrzą, ale „nie wiem”, co widzę","Очі дивляться, але «не знаю», що бачу")),20,200,{s:12,c:C.bad,w:600});
+    }}]},
+  {id:"cb",n:L("Móżdżek","Мозочок"),scenes:[
+   {id:"tim",n:L("Rytm i timing","Ритм і таймінг"),slider:[L("Zdrowy móżdżek","Здоровий мозочок"),L("Uszkodzony","Уражений")],
+    cap:d=>d<.35?[1,L("Móżdżek odmierza czas: stuknięcia trafiają w rytm","Мозочок відмірює час: удари влучають у ритм")]:[0,L("Timing się rozjeżdża: stuknięcia nie trafiają","Таймінг розлазиться: удари не влучають")],
+    draw(t,d,st){
+      if(!st.taps){st.taps=[];st.next=0}
+      const B=800;while(st.next*B<t+2000){const k=st.next;st.taps.push({b:k*B,e:(Math.sin(k*12.9)*.5+Math.sin(k*4.1)*.5)*d*320});st.next++}
+      const sx=v=>300-(t-v)/12;
+      T(tr(L("metronom","метроном")),10,52,{s:11,c:C.muted});T(tr(L("stuknięcia","удари")),10,122,{s:11,c:C.muted});line(80,60,350,60,C.line,1);line(80,130,350,130,C.line,1);
+      let err=0,n=0;
+      st.taps.forEach(p=>{const X=sx(p.b);if(X>80&&X<352){line(X,48,X,72,C.hema,3)}const X2=sx(p.b+p.e);if(p.b+p.e<=t&&X2>80&&X2<352){circ(X2,130,7,Math.abs(p.e)<60?C.good:C.bad);line(X,72,X2,122,C.line,1)}if(p.b+p.e<=t&&p.b>t-8000){err+=Math.abs(p.e);n++}});
+      line(300,30,300,150,C.eosin,1);
+      const near=st.taps.some(p=>Math.abs(t-(p.b+p.e))<90);T("✋",300,186+(near?6:0),{a:"center",s:24});
+      T(tr(L("Średni błąd: {0} ms","Середня похибка: {0} мс"),n?Math.round(err/n):0),20,24,{w:700,c:d<.35?C.good:C.bad});
+    }},
+   {id:"gait",n:L("Chód po linii","Хода по лінії"),slider:[L("Zdrowy móżdżek","Здоровий мозочок"),L("Uszkodzony","Уражений")],
+    cap:d=>d<.35?[1,L("Kroki równe, w linii","Кроки рівні, по лінії")]:[0,L("Ataksja: chód szeroki, chwiejny, kroki nierówne","Атаксія: хода широка, хитка, кроки нерівні")],
+    draw(t,d){
+      line(10,120,350,120,C.line,2);x.setLineDash([]);
+      const steps=Math.floor((t%7000)/450);
+      for(let i=0;i<steps&&i<14;i++){const side=i%2?1:-1,X=24+i*23+Math.sin(i*7.3)*d*9,Y=120+side*(6+d*16)+Math.sin(i*3.7)*d*14;
+        x.save();x.translate(X,Y);x.rotate(Math.sin(i*5.1)*d*.6);x.fillStyle=side>0?C.eosin:C.hema;x.beginPath();x.ellipse(0,0,8,4.5,0,0,7);x.fill();x.restore()}
+      const px=24+Math.min(13,steps)*23,sw=Math.sin(t/180)*d*10;
+      person(px,90,C.ink,{hx:sw,a1x:-6-d*10,a1y:-d*14,a2x:6+d*10,a2y:-d*14});
+      T(d<.35?tr(L("prosto i pewnie","рівно і впевнено")):tr(L("jak po alkoholu","як після алкоголю")),20,190,{w:700,c:d<.35?C.good:C.bad});
+    }},
+   {id:"blink",n:L("Mruganie warunkowe","Умовне кліпання"),slider:[L("Zdrowy móżdżek","Здоровий мозочок"),L("Uszkodzony","Уражений")],
+    cap:d=>d<.5?[1,L("Móżdżek uczy się: mrugam już na dźwięk, przed dmuchnięciem","Мозочок навчається: кліпаю вже на звук, до подуву")]:[0,L("Brak uczenia: mrugam dopiero po dmuchnięciu","Навчання немає: кліпаю лише після подуву")],
+    draw(t,d,st){
+      const P=2600;const trial=Math.floor(t/P),ph=t%P;
+      if(st.d!==d){st.d=d;st.base=trial}
+      const n=trial-st.base,Lr=clamp(n*(1-d)*.22,0,1);
+      const tone=700,puff=1300,blink=Lr>.5?lerp(puff-80,tone+150,(Lr-.5)*2):puff+120;
+      const closed=ph>blink&&ph<blink+260;
+      x.fillStyle=C.surface;x.strokeStyle=C.ink;x.lineWidth=2;x.beginPath();x.ellipse(110,90,46,closed?3:26,0,0,7);x.fill();x.stroke();
+      if(!closed){circ(110,90,15,C.hema);circ(110,90,6,C.ink)}
+      if(ph>tone&&ph<tone+500)T("♪",190,60,{s:30,c:C.hema});
+      if(ph>puff&&ph<puff+300){x.strokeStyle=C.muted;x.lineWidth=2;for(let i=0;i<3;i++){x.beginPath();x.moveTo(230-i*4,80+i*10);x.lineTo(170,86+i*4);x.stroke()}T("💨",240,95,{s:20})}
+      const tx=v=>40+v/P*290;line(40,170,330,170,C.line,2);
+      T("♪",tx(tone),162,{a:"center",s:14,c:C.hema});T("💨",tx(puff),162,{a:"center",s:12});
+      x.fillStyle=C.eosin;x.fillRect(tx(blink)-2,172,4,14);T(tr(L("mrugnięcie","кліпання")),tx(blink),200,{a:"center",s:10,c:C.eosin});
+      line(tx(ph),150,tx(ph),190,C.ink,1);
+      T(tr(L("Próba {0}","Спроба {0}"),n+1),250,30,{w:700});
+      T(tr(L("Wyuczenie: {0}%","Навченість: {0}%"),Math.round(Lr*100)),250,50,{s:12,c:C.muted});
+    }},
+   {id:"neu",n:L("Ile ma neuronów?","Скільки в ньому нейронів?"),slider:null,
+    cap:()=>[1,L("Móżdżek: ok. 80% neuronów mózgu, choć to ok. 10% jego masy","Мозочок: ~80% нейронів мозку, хоча це ~10% його маси")],
+    draw(t){
+      const shown=Math.min(86,Math.floor(t/60)%140);
+      for(let i=0;i<86;i++){const X=22+(i%12)*15,Y=26+Math.floor(i/12)*19;circ(X,Y,6,i<shown?(i<69?C.eosin:C.hema):C.line)}
+      rr(204,40,14,14,3,C.eosin);T(tr(L("móżdżek ≈ 69 mld","мозочок ≈ 69 млрд")),224,52,{s:12,w:600});
+      rr(204,66,14,14,3,C.hema);T(tr(L("reszta ≈ 17 mld","решта ≈ 17 млрд")),224,78,{s:12,w:600});
+      T(tr(L("1 kropka ≈ 1 mld neuronów","1 крапка ≈ 1 млрд нейронів")),24,190,{s:12,c:C.muted});
+      T(tr(L("głównie drobne komórki ziarniste","переважно дрібні зернисті клітини")),24,206,{s:11,c:C.muted});
+    }}]},
+  {id:"bg",n:L("Jądra podstawne","Базальні ганглії"),scenes:[
+   {id:"ana",n:L("Gdzie leżą?","Де вони лежать?"),slider:null,
+    cap:()=>[1,L("Prążkowie = jądro ogoniaste + skorupa; dopamina płynie z istoty czarnej","Смугасте тіло = хвостате ядро + шкаралупа; дофамін надходить із чорної речовини")],
+    draw(t){
+      x.fillStyle=C.soft;x.strokeStyle=C.hema;x.lineWidth=2;x.beginPath();x.ellipse(180,92,160,82,0,0,7);x.fill();x.stroke();
+      line(180,12,180,120,C.line,2);
+      x.fillStyle=C.surface;[[-1],[1]].forEach(([s])=>{x.beginPath();x.ellipse(180+s*16,80,8,24,s*.2,0,7);x.fill()});
+      [[-1],[1]].forEach(([s])=>{const cx=180+s*34;x.fillStyle=C.eosin;x.beginPath();x.ellipse(cx,72,12,20,s*.25,0,7);x.fill();
+        x.fillStyle=C.good;x.beginPath();x.ellipse(180+s*82,102,20,30,s*.1,0,7);x.fill();
+        x.fillStyle="#f2c14e";x.beginPath();x.ellipse(180+s*58,108,9,20,s*.1,0,7);x.fill();
+        x.fillStyle=C.ink;x.beginPath();x.ellipse(180+s*20,182,12,5,s*.3,0,7);x.fill()});
+      x.strokeStyle=C.muted;x.lineWidth=1.5;x.beginPath();x.moveTo(150,174);x.lineTo(150,150);x.lineTo(210,150);x.lineTo(210,174);x.stroke();
+      const ph=(t%2000)/2000;[[-1],[1]].forEach(([s])=>{for(let k=0;k<3;k++){const q=(ph+k/3)%1;circ(lerp(180+s*20,180+s*(k%2?82:34),q),lerp(178,k%2?110:80,q),3,C.ink)}});
+      T(tr(L("jądro ogoniaste","хвостате ядро")),8,40,{s:11,c:C.eosin,w:700});T(tr(L("skorupa","шкаралупа")),300,30,{s:11,c:C.good,w:700});
+      T(tr(L("gałka blada","бліда куля")),262,170,{s:11,c:"#b8860b",w:700});T(tr(L("istota czarna","чорна речовина")),222,200,{s:11,c:C.ink,w:700});
+      T(tr(L("● dopamina","● дофамін")),8,200,{s:11,c:C.ink});
+    }},
+   {id:"park",n:L("Parkinson","Паркінсон"),slider:[L("Pełna dopamina","Повний дофамін"),L("Brak dopaminy","Немає дофаміну")],
+    cap:d=>d<.35?[1,L("Jądra podstawne „puszczają” ruch płynnie","Базальні ганглії «пропускають» рух плавно")]:[0,L("Parkinson: trudny start, małe kroki, drżenie w spoczynku","Паркінсон: важкий старт, дрібні кроки, тремор спокою")],
+    draw(t,d){
+      const per=6000,ph=t%per,delay=200+d*2600,moving=ph>delay;const sp=lerp(70,14,d),st=lerp(12,3,d);
+      const X=40+Math.max(0,ph-delay)/1000*sp;const g=Math.sin(Math.max(0,ph-delay)/(lerp(120,90,d)))*(moving?1:0);
+      const trem=moving?0:Math.sin(t/32)*d*4;
+      person(Math.min(X,330),165,C.hema,{l1:g*st,l2:-g*st,a1x:-g*st*(1-d),a2x:g*st*(1-d)+trem,a2y:trem*.5});
+      rr(20,20,120,12,6,C.line);rr(20,20,120*(1-d),12,6,C.ink);T(tr(L("dopamina","дофамін")),146,31,{s:11,c:C.muted});
+      T(!moving?tr(L("Chcę iść… nie mogę ruszyć","Хочу йти… не можу рушити")):tr(L("idzie","іде")),20,60,{w:700,c:!moving&&d>.35?C.bad:C.ink});
+    }},
+   {id:"hunt",n:L("Huntington","Гантінгтон"),slider:[L("Zdrowe prążkowie","Здорове смугасте тіло"),L("Zanik prążkowia","Атрофія смугастого тіла")],
+    cap:d=>d<.35?[1,L("Prążkowie blokuje niechciane ruchy: stoję spokojnie","Смугасте тіло блокує небажані рухи: стою спокійно")]:[0,L("Pląsawica: mimowolne, „tańczące” ruchy","Хорея: мимовільні, «танцювальні» рухи")],
+    draw(t,d){
+      const s=t/300,a=d*24;
+      person(180,170,C.hema,{hx:noise(s,1)*a*.5,a1x:noise(s,2)*a,a1y:noise(s,3)*a,a2x:noise(s,4)*a,a2y:noise(s,5)*a,l1:noise(s,6)*a*.5,l2:noise(s,7)*a*.5});
+      T(tr(L("Stój spokojnie","Стій спокійно")),20,30,{w:700});
+      if(d>.35)T(tr(L("…ciało rusza się samo","…тіло рухається само")),20,52,{s:12,c:C.bad,w:600});
+    }},
+   {id:"hab",n:L("Nawyk","Звичка"),slider:[L("Zdrowe prążkowie","Здорове смугасте тіло"),L("Uszkodzone","Уражене")],
+    cap:d=>d<.5?[1,L("Z każdą próbą szybciej: powstaje nawyk","З кожною спробою швидше: формується звичка")]:[0,L("Nawyk się nie tworzy: za każdym razem jak pierwszy raz","Звичка не формується: щоразу як уперше")],
+    draw(t,d,st){
+      if(st.d!==d){st.d=d;st.t0=t;st.times=[]}
+      const n=st.times.length,dur=900+3600*Math.exp(-n*(1-d)*.6),el=t-st.t0;
+      if(el>dur+400){st.times.push(dur);if(st.times.length>10)st.times.shift();st.t0=t}
+      const k=clamp(el/dur,0,1);const wig=dur/4500;
+      const PX=u=>40+u*200,PY=u=>110+Math.sin(u*Math.PI*6)*40*wig;
+      x.strokeStyle=C.line;x.lineWidth=1.5;x.beginPath();for(let i=0;i<=40;i++){const u=i/40;i?x.lineTo(PX(u),PY(u)):x.moveTo(PX(u),PY(u))}x.stroke();
+      T("🏠",22,116,{s:18});T("☕",246,116,{s:18});circ(PX(k),PY(k),7,C.eosin);
+      line(272,30,272,180,C.line,1);
+      st.times.forEach((v,i)=>{const hgt=v/4500*130;rr(280+i*7,180-hgt,5,hgt,2,C.hema)});
+      T(tr(L("czas dojścia","час дороги")),280,196,{s:10,c:C.muted});
+      T(tr(L("Próba {0}","Спроба {0}"),n+1),20,30,{w:700});
+    }}]}];
+
+  /* mapa mózgu */
+  const s=sv("svg",{viewBox:"0 0 400 260",class:"brain",role:"img","aria-label":L("Mózg: kora, móżdżek i jądra podstawne; dotknij struktury","Мозок: кора, мозочок і базальні ганглії; торкнися структури")});
+  const CER="M70,160 C45,110 80,40 170,28 C260,16 345,50 365,120 C375,165 355,195 320,198 C300,200 280,192 262,190 C240,205 200,212 165,205 C130,198 95,190 70,160 Z";
+  s.append(sv("path",{class:"sv-o",d:"M236,192 C242,220 240,248 234,258 L264,258 C264,248 270,222 272,194 Z",style:"pointer-events:none"}),
+    sv("ellipse",{class:"rg","data-id":"cb",cx:308,cy:222,rx:50,ry:27}),
+    sv("path",{class:"rg","data-id":"cx",d:CER}),
+    sv("path",{class:"rg strip cd","data-id":"bg",d:"M252,104 C256,72 224,56 196,64 C174,70 166,92 180,108"}),
+    sv("ellipse",{class:"rg","data-id":"bg",cx:220,cy:124,rx:22,ry:15}),
+    sv("text",{x:258,y:78,class:"sv-t",style:"pointer-events:none"},L("w głębi","у глибині")));
+  const title=el("h3",{class:"scn-t"}),cap=readout();
+  const sl=el("input",{type:"range",min:"0",max:"100",value:"0",id:"cbg-d"});
+  const slL=el("span"),slR=el("span");
+  const sliderBox=el("div",{class:"ctrl"},el("label",{for:"cbg-d",class:"spread"},slL,slR),sl);
+  const sceneChips=el("div");
+  let g=G[0],sc=G[0].scenes[0],t0=performance.now(),st={};
+  const gChips=chips(G.map(q=>[q.id,q.n]),g.id,k=>{g=G.find(q=>q.id===k);pickScene(g.scenes[0].id)});
+  s.addEventListener("click",e=>{const r=e.target.closest(".rg");if(r){const b=gChips.querySelector(`[data-k="${r.dataset.id}"]`);if(b)b.click()}});
+  function pickScene(id){
+    sc=g.scenes.find(q=>q.id===id);t0=performance.now();st={};sl.value="0";
+    sceneChips.innerHTML="";sceneChips.append(chips(g.scenes.map(q=>[q.id,q.n]),sc.id,k=>pickScene(k)));
+    sceneChips.firstChild.classList.add("sub");
+    s.querySelectorAll(".rg").forEach(n=>n.classList.toggle("act",n.dataset.id===g.id));
+    title.textContent=tr(sc.n);sliderBox.hidden=!sc.slider;
+    if(sc.slider){slL.textContent="✓ "+tr(sc.slider[0]);slR.textContent=tr(sc.slider[1])+" ✕"}
+  }
+  root.append(el("div",{class:"fig"},s),gChips,sceneChips,el("div",{class:"scene"},title,cv),sliderBox,cap,
+    el("p",{class:"try"},L("Wybierz strukturę, potem każdą scenkę. Gdzie jest suwak, przesuń go powoli w prawo.","Вибери структуру, потім кожну сценку. Де є повзунок, повільно посунь його праворуч.")));
+  pickScene("lay");
+  loop(now=>{
+    const d=+sl.value/100,t=now-t0;x.clearRect(0,0,360,210);sc.draw(t,d,st);
+    s.classList.toggle("lesion",!!sc.slider&&d>=.35);
+    const [ok,txt]=sc.cap(d);cap.innerHTML="";cap.append(el("span",{class:"pill"+(ok?"":" hot")},(ok?"✓ ":"✕ ")+tr(txt)));
+  });
+}
+
 /* ---- Układ autonomiczny ---- */
 function simANS(root){
   const C=colors();
@@ -1211,11 +1410,11 @@ function sortExplore(root,l){
 }
 
 const SIM={
- ns:(r,l)=>diagramExplore(r,l), ans:r=>simANS(r), lobes:r=>simBrain(r,"f"), cbg:(r,l)=>sortExplore(r,l), cases:r=>simBrain(r,"l"),
+ ns:(r,l)=>diagramExplore(r,l), ans:r=>simANS(r), lobes:r=>simBrain(r,"f"), cbg:r=>simCBG(r), cases:r=>simBrain(r,"l"),
  neuron:(r,l)=>simNeuron(r,l), ap:r=>simAP(r), syn:r=>simSynapse(r,"syn"), nt:(r,l)=>factsExplore(r,l), drugs:r=>simSynapse(r,"drugs"),
  hpa:r=>simFlow(r,HPA), horm:(r,l)=>factsExplore(r,l), fear:r=>simFlow(r,FEAR), mem:(r,l)=>factsExplore(r,l), ltp:r=>simLTP(r),
  plast:(r,l)=>factsExplore(r,l), dev:r=>simDev(r), gen:r=>simTwins(r), evo:(r,l)=>factsExplore(r,l), eeg:r=>simEEG(r), methods:r=>simMethods(r)};
-const SIMKIND={ns:"schemat",ans:"symulacja",lobes:"mapa mózgu",cbg:"sortowanie",cases:"mapa uszkodzeń",neuron:"symulacja",ap:"symulacja",syn:"symulacja",nt:"odsłanianie",drugs:"symulacja",hpa:"animacja",horm:"odsłanianie",fear:"animacja",mem:"odsłanianie",ltp:"eksperyment",plast:"odsłanianie",dev:"oś czasu",gen:"symulacja",evo:"odsłanianie",eeg:"symulacja",methods:"wykres"};
+const SIMKIND={ns:"schemat",ans:"symulacja",lobes:"mapa mózgu",cbg:"symulacja",cases:"mapa uszkodzeń",neuron:"symulacja",ap:"symulacja",syn:"symulacja",nt:"odsłanianie",drugs:"symulacja",hpa:"animacja",horm:"odsłanianie",fear:"animacja",mem:"odsłanianie",ltp:"eksperyment",plast:"odsłanianie",dev:"oś czasu",gen:"symulacja",evo:"odsłanianie",eeg:"symulacja",methods:"wykres"};
 
 /* ---------- Wybór języka ---------- */
 function setLang(l){LANG=l;try{localStorage.setItem("neuro-lang",l)}catch(e){}document.documentElement.lang=l==="uk"?"uk":"pl";document.title=l==="uk"?"Нейроскладанка":"Neuroukładanka";route()}
@@ -1271,7 +1470,7 @@ function openLevel(l,tab,stage,carry){
   if(tab==="x"){
     const body=el("div",{class:"lvl explore"});app.append(body);
     SIM[l.id](body,l);
-    if(!["nt","horm","mem","plast","evo","cbg"].includes(l.id))factsExplore(body,l,"Wszystko, co będzie w zadaniu");
+    if(!["nt","horm","mem","plast","evo"].includes(l.id))factsExplore(body,l,"Wszystko, co będzie w zadaniu");
     body.append(el("div",{class:"gonext"},el("button",{class:"btn pri",onclick:()=>openLevel(l,"q")},"Rozumiem, przejdź do zadania →")));
   }else play(l,stage||0,carry||0);
 }
